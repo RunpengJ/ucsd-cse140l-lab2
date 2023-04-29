@@ -1,0 +1,61 @@
+# Loading project lab2part3
+vsim work.lab2_3_tb
+# vsim work.lab2_3_tb 
+# Start time: 08:42:07 on Oct 24,2022
+# Loading sv_std.std
+# Loading work.lab2_3_tb_sv_unit
+# Loading work.lab2_3_tb
+# Loading work.top_level_2_3
+# Loading work.ct_mod_N
+# Loading work.ct_mod_D
+# Loading work.lcd_int
+# Loading work.alarm
+vsim work.lab2_3_tb
+# End time: 08:42:58 on Oct 24,2022, Elapsed time: 0:00:51
+# Errors: 0, Warnings: 0
+# vsim work.lab2_3_tb 
+# Start time: 08:42:58 on Oct 24,2022
+# Loading sv_std.std
+# Loading work.lab2_3_tb_sv_unit
+# Loading work.lab2_3_tb
+# Loading work.top_level_2_3
+# Loading work.ct_mod_N
+# Loading work.ct_mod_D
+# Loading work.lcd_int
+# Loading work.alarm
+add wave -position insertpoint sim:/lab2_3_tb/top/*
+run -all
+# 5': before setting. '010100000', Jan 1,                 4000
+#  _        _        _    _   _    _   _  
+# | |   |  | |   |  | |  | | | |  | | | | 
+# |_|   |  |_|   |  |_|  |_| |_|  |_| |_| 
+# 5':after setting,'1231', manually increment date/month successful                68000
+#      _    _        _    _   _    _   _  
+#   |  _|   _|   |  | |  | | | |  | | | | 
+#   | |_    _|   |  |_|  |_| |_|  |_| |_| 
+# 5': '010100',passively increment date/month successful, also testing range month 1-12, date from 1            172868000
+#  _        _             _   _    _   _  
+# | |   |  | |   |    |  | | | |  | | | | 
+# |_|   |  |_|   |    |  |_| |_|  |_| |_| 
+# 5'---------------testing mod-----------
+# testing Feb has 28 days:'0228'            172926000
+#  _   _    _   _         _   _    _   _  
+# | |  _|   _| |_|    |  | | | |  | | | | 
+# |_| |_   |_  |_|    |  |_| |_|  |_| |_| 
+# 0301
+#  _   _    _        _    _   _    _   _  
+# | |  _|  | |   |   _|  | | | |  | | | | 
+# |_|  _|  |_|   |  |_   |_| |_|  |_| |_| 
+# testing April has 30 days: '0430'            345788000
+#  _        _   _    _    _   _    _   _  
+# | | |_|   _| | |   _|  | | | |  | | | | 
+# |_|   |   _| |_|  |_   |_| |_|  |_| |_| 
+# 5 points: 0501            518588000
+#  _   _    _        _    _   _    _   _  
+# | | |_   | |   |   _|  | | | |  | | | | 
+# |_|  _|  |_|   |   _|  |_| |_|  |_| |_| 
+# ** Note: $stop    : C:/class/cse/140l/2022fa/Lab2/part3_solution/lab2_3_tb.sv(102)
+#    Time: 518688 ns  Iteration: 0  Instance: /lab2_3_tb
+# Break in Module lab2_3_tb at C:/class/cse/140l/2022fa/Lab2/part3_solution/lab2_3_tb.sv line 102
+# End time: 09:00:36 on Oct 24,2022, Elapsed time: 0:17:38
+# Errors: 0, Warnings: 0
