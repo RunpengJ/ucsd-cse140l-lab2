@@ -30,23 +30,23 @@ module struct_diag #(parameter NS=60, NH=24)(
     .ct_out(TSec), .z(Szero)
     );
 // minutes counter -- runs at either 1/sec or 1/60sec
-  ct_mod_N #(.N()) Mct(
-    .clk(), .rst(), .en(TMen), .ct_out(TMin), .z(Mzero)
+  ct_mod_N #(.N(NS)) Mct(
+    .clk(Pulse), .rst(Reset), .en(TMen), .ct_out(TMin), .z(Mzero)
     );
 // hours counter -- runs at either 1/sec or 1/60min
-  ct_mod_N #(.N()) Hct(
-	.clk(), .rst(), .en(), .ct_out(), .z()
+  ct_mod_N #(.N(NH)) Hct(
+	.clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
     );
 // alarm set registers -- either hold or advance 1/sec
-  ct_mod_N #(.N()) Mreg(
+  ct_mod_N #(.N(NS)) Mreg(
 // input ports
-    .clk(), .rst(), .en(AMen), 
+    .clk(Pulse), .rst(Reset), .en(AMen), 
 // output ports    
-    .ct_out(AMin), .z()
+    .ct_out(AMin), .z(Mzero)
     ); 
 
-  ct_mod_N #(.N()) Hreg(
-    .clk(), .rst(), .en(), .ct_out(), .z()
+  ct_mod_N #(.N(NH)) Hreg(
+    .clk(Pulse), .rst(Reset), .en(AHen), .ct_out(AHrs), .z(Hzero)
     ); 
 
 // display drivers (2 digits each, 6 digits total)
