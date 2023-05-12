@@ -13,14 +13,15 @@ module struct_diag #(parameter NS=60, NH=24)(
   output [6:0] S1disp, S0disp, 	   // 2-digit seconds display
                M1disp, M0disp, 
                H1disp, H0disp,
+			   D1disp, D0disp,
 //                       D0disp,   // for part 2
   output logic Buzz);	           // alarm sounds
 // internal connections (may need more)
-  logic[6:0] TSec, TMin, THrs,     // clock/time 
+  logic[6:0] TSec, TMin, THrs, TDys    // clock/time 
              AMin, AHrs;		   // alarm setting
-  logic[6:0] Min, Hrs;
-  logic Szero, Mzero, Hzero, 	   // "carry out" from sec -> min, min -> hrs, hrs -> days
-        TMen, THen, AMen, AHen;
+  logic[6:0] Min, Hrs, Dys;
+  logic Szero, Mzero, Hzero, Dzero	   // "carry out" from sec -> min, min -> hrs, hrs -> days
+        TMen, THen, TDen, AMen, AHen;
   logic buzz;
 always_comb begin
 	//SET TIME
@@ -52,7 +53,10 @@ always_comb begin
 			THen = 1;
 	end
 	if (Alarmon)
-		Buzz = (TMin == AMin) && (THrs == AHrs);
+	begin
+		if ((TDys%7 == 6) && (TDys%7 == 7))
+			Buzz = (TMin == AMin) && (THrs == AHrs);
+	end
 	else
 		Buzz = 0;
 			
@@ -71,6 +75,10 @@ end
 // hours counter -- runs at either 1/sec or 1/60min
   ct_mod_N #(.N(NH)) Hct(
 	.clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
+    );
+// days counter -- runs at either 1/sec or 1/60min
+  ct_mod_N #(.N(24)) Dct(
+	.clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
     );
 // alarm set registers -- either hold or advance 1/sec
   ct_mod_N #(.N(NS)) Mreg(
@@ -101,6 +109,12 @@ end
     .bin_in    (Hrs),
 	.Segment1  (H1disp),
 	  .Segment0  (H0disp)
+	);
+
+  lcd_int Ddisp(
+    .bin_in    (Dys),
+	.Segment1  (D1disp),
+	  .Segment0  (D0disp)
 	);
 
 // buzz off :)	  make the connections
