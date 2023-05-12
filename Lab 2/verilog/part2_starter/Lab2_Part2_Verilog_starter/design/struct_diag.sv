@@ -7,13 +7,14 @@ module struct_diag #(parameter NS=60, NH=24)(
         Alarmset,	  //	(five total)
 		Minadv,
 		Hrsadv,
+		Dysadv,
 		Alarmon,
 		Pulse,		  // assume 1/sec.
 // 6 decimal digit display (7 segment)
   output [6:0] S1disp, S0disp, 	   // 2-digit seconds display
                M1disp, M0disp, 
                H1disp, H0disp,
-			   D1disp, D0disp,
+			D0disp,
 //                       D0disp,   // for part 2
   output logic Buzz);	           // alarm sounds
 // internal connections (may need more)
@@ -24,7 +25,7 @@ module struct_diag #(parameter NS=60, NH=24)(
         TMen, THen, TDen, AMen, AHen;
   logic buzz;
 always_comb begin
-	//SET TIME
+	//SET ALARM TIME
 	if(Alarmset == 1 && Timeset == 0) begin
 		//DISPLAY ALARM TIME
 		Min = AMin;
@@ -34,13 +35,16 @@ always_comb begin
 		if (Hrsadv)
 			AHen = 1;
 	end
+	//SET TIME
 	else if (Alarmset == 0 && Timeset == 1) begin
 		Min = TMin;
 		Hrs = THrs;
+		Dys = TDys;
 		if (Minadv)
 			TMen = 1;
 		if (Hrsadv)
 			THen = 1;
+		if ()
 	end
 	else begin
 		Min = TMin;
