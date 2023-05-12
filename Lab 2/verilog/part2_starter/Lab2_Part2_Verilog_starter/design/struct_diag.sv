@@ -14,7 +14,8 @@ module struct_diag #(parameter NS=60, NH=24, ND=7)(
   output [6:0] S1disp, S0disp, 	   // 2-digit seconds display
                M1disp, M0disp, 
                H1disp, H0disp,
-			D0disp,
+			D0disp, 
+			// D1disp, 
 //                       D0disp,   // for part 2
   output logic Buzz);	           // alarm sounds
 // internal connections (may need more)
@@ -59,12 +60,14 @@ always_comb begin
 		if (Mzero == 1 && Szero == 1)
 			THen = 1;
 		//when it's 23hr 59'59'', DAY++
-		if (Dzero == 1 && Mzero == 1 && Szero == 1)
+		if (Hzero == 1 && Mzero == 1 && Szero == 1)
 			TDen = 1;
+		// if (Dzero == 1 && Hzero == 1 && Mzero == 1 && Szero == 1)
+		// 	TDen = 1;
 	end
 	
-	//The alarm will never buzz on Saturdays(day 5) or Sundays(day 6),
-	//regardless of whether the alarm is enabled or not.
+	// The alarm will never buzz on Saturdays(day 5) or Sundays(day 6),
+	// regardless of whether the alarm is enabled or not.
 	if ((TDys % 7 == 5) || (TDys % 7 == 6))
 		Buzz = 0;
 	else begin
@@ -126,7 +129,7 @@ end
 
   lcd_int Ddisp(
     .bin_in    (Dys),
-	.Segment1  (D1disp),
+	// .Segment1  (D1disp),
 	  .Segment0  (D0disp)
 	);
 
