@@ -58,14 +58,14 @@ module struct_diag #(parameter NS=60, NH=24)(
 
   lcd_int Mdisp(
     .bin_in    (Min),
-	.Segment1  (   ),
-	.Segment0  (   )
+	.Segment1  (M1disp),
+	 .Segment0 (M0disp)
 	);
 
   lcd_int Hdisp(
     .bin_in    (Hrs),
-	.Segment1  (   ),
-	.Segment0  (   )
+	.Segment1  (H1disp),
+	  .Segment0  (H0disp)
 	);
 
 // buzz off :)	  make the connections
