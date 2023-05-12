@@ -21,7 +21,37 @@ module struct_diag #(parameter NS=60, NH=24)(
   logic[6:0] Min, Hrs;
   logic Szero, Mzero, Hzero, 	   // "carry out" from sec -> min, min -> hrs, hrs -> days
         TMen, THen, AMen, AHen; 
-
+always_comb begin
+	//SET TIME
+	if(Alarmset == 1 && Timeset == 0) begin
+		//DISPLAY ALARM TIME
+		Min = AMin;
+		Hrs = AHrs;
+		if (Minadv)
+			AMen = 1;
+		if (Hrsadv)
+			AHen = 1;
+	end
+	else if (Alarmset == 0 && Timeset == 1) begin
+		Min = TMin;
+		Hrs = THrs;
+		if (Minadv)
+			TMen = 1;
+		if (Hrsadv)
+			THen = 1;
+	end
+	else begin
+		Min = TMin;
+		Hrs = THrs;
+		//WHEN IT'S 59'', MINUTE++
+		if (Szero == 1)
+			TMen = 1;
+		//WHEN IT'S 59'59'', HOUR++
+		if (Mzero == 1 && Szero == 1)
+			THen = 1;
+	end
+			
+end
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
   ct_mod_N #(.N(NS)) Sct(
 // input ports
@@ -42,11 +72,11 @@ module struct_diag #(parameter NS=60, NH=24)(
 // input ports
     .clk(Pulse), .rst(Reset), .en(AMen), 
 // output ports    
-    .ct_out(AMin), .z(Mzero)
+    .ct_out(AMin), .z()
     ); 
 
   ct_mod_N #(.N(NH)) Hreg(
-    .clk(Pulse), .rst(Reset), .en(AHen), .ct_out(AHrs), .z(Hzero)
+    .clk(Pulse), .rst(Reset), .en(AHen), .ct_out(AHrs), .z()
     ); 
 
 // display drivers (2 digits each, 6 digits total)
