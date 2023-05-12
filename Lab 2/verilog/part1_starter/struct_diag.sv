@@ -52,7 +52,7 @@ always_comb begin
 			THen = 1;
 	end
 	if (Alarmon)
-		Buzz = (TMin == AMin) && (THrs == AHrs);
+		Buzz = buzz;
 	else
 		Buzz = 0;
 			
