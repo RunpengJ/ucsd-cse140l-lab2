@@ -40,7 +40,7 @@ task display_tb(input[6:0] seg_d,
 	  $fwrite(h1," ");
 	  if(seg_e[1]) $fwrite(h1,"|");
 	  else $fwrite(h1," ");
-	  if(seg_e[0]) $fwrite(h1,"_");		   _
+	  if(seg_e[0]) $fwrite(h1,"_");
 	  else $fwrite(h1," ");				 
 	  if(seg_e[5]) $fwrite(h1,"|");		  
 	  else $fwrite(h1," ");
