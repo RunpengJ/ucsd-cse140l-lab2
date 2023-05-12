@@ -44,17 +44,23 @@ always_comb begin
 			TMen = 1;
 		if (Hrsadv)
 			THen = 1;
-		if ()
+		if (Dysadv)
+			TDen = 1;
 	end
+	// when begin rolling over
 	else begin
 		Min = TMin;
 		Hrs = THrs;
+		Dys = TDys;
 		//WHEN IT'S 59'', MINUTE++
 		if (Szero == 1)
 			TMen = 1;
 		//WHEN IT'S 59'59'', HOUR++
 		if (Mzero == 1 && Szero == 1)
 			THen = 1;
+		//when it's 23hr 59'59'', DAY++
+		if (Dzero == 1 && Mzero == 1 && Szero == 1)
+			TDen = 1;
 	end
 	
 	//The alarm will never buzz on Saturdays(day 5) or Sundays(day 6),
