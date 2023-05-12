@@ -51,6 +51,10 @@ always_comb begin
 		if (Mzero == 1 && Szero == 1)
 			THen = 1;
 	end
+	if (Alarmon)
+		Buzz = (TMin == AMin) && (THrs == AHrs);
+	else
+		Buzz = 0;
 			
 end
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
