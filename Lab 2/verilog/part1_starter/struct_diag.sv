@@ -30,16 +30,26 @@ always_comb begin
 		Hrs = AHrs;
 		if (Minadv)
 			AMen = 1;
+		else
+			AMen = 0;
+
 		if (Hrsadv)
 			AHen = 1;
+		else
+			AHen = 0;
 	end
 	else if (Alarmset == 0 && Timeset == 1) begin
 		Min = TMin;
 		Hrs = THrs;
 		if (Minadv)
 			TMen = 1;
+		else
+			TMen = 0;
+
 		if (Hrsadv)
 			THen = 1;
+		else
+			THen = 0;
 	end
 	else begin
 		Min = TMin;
@@ -47,9 +57,14 @@ always_comb begin
 		//WHEN IT'S 59'', MINUTE++
 		if (Szero == 1)
 			TMen = 1;
+		else
+			TMen = 0;
+
 		//WHEN IT'S 59'59'', HOUR++
 		if (Mzero == 1 && Szero == 1)
 			THen = 1;
+		else
+			THen = 0;
 	end
 	if (Alarmon)
 		Buzz = buzz;
