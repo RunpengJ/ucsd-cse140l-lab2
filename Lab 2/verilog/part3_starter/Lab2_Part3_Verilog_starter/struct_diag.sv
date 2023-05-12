@@ -1,30 +1,33 @@
 // CSE140L  
 // see Structural Diagram in Lab2 assignment writeup
 // fill in missing connections and parameters
-module struct_diag #(parameter NS=60, NH=24)(
+module struct_diag #(parameter NS=60, NH=24, ND=7)(
   input Reset,
         Timeset, 	  // manual buttons
         Alarmset,	  //	(five total)
 		Minadv,
 		Hrsadv,
+		Dysadv,
 		Alarmon,
 		Pulse,		  // assume 1/sec.
 // 6 decimal digit display (7 segment)
   output [6:0] S1disp, S0disp, 	   // 2-digit seconds display
                M1disp, M0disp, 
                H1disp, H0disp,
-			   D1disp, D0disp,
+			D0disp, 
+			Dt0disp, Dt1disp, // date
+			Mon0disp, Mon1disp, // month
 //                       D0disp,   // for part 2
   output logic Buzz);	           // alarm sounds
 // internal connections (may need more)
-  logic[6:0] TSec, TMin, THrs, TDys    // clock/time 
+  logic[6:0] TSec, TMin, THrs, TDys, TDts, TMon    // clock/time 
              AMin, AHrs;		   // alarm setting
-  logic[6:0] Min, Hrs, Dys;
-  logic Szero, Mzero, Hzero, Dzero	   // "carry out" from sec -> min, min -> hrs, hrs -> days
-        TMen, THen, TDen, AMen, AHen;
+  logic[6:0] Min, Hrs, Dys, Dts, Mon;
+  logic Szero, Mzero, Hzero, Dzero, Monzero	   // "carry out" from sec -> min, min -> hrs, hrs -> days
+        TMen, THen, TDen, TMonen, AMen, AHen;
   logic buzz;
 always_comb begin
-	//SET TIME
+	//SET ALARM TIME
 	if(Alarmset == 1 && Timeset == 0) begin
 		//DISPLAY ALARM TIME
 		Min = AMin;
@@ -34,32 +37,47 @@ always_comb begin
 		if (Hrsadv)
 			AHen = 1;
 	end
+	//SET TIME
 	else if (Alarmset == 0 && Timeset == 1) begin
+		// DISPLAY CLOCK TIME
 		Min = TMin;
 		Hrs = THrs;
+		Dys = TDys;
+		Dts = TDts;
+		Mon = TMon
 		if (Minadv)
 			TMen = 1;
 		if (Hrsadv)
 			THen = 1;
+		if (Dysadv)
+			TDen = 1;
 	end
+	// when begin rolling over
 	else begin
 		Min = TMin;
 		Hrs = THrs;
+		Dys = TDys;
 		//WHEN IT'S 59'', MINUTE++
 		if (Szero == 1)
 			TMen = 1;
 		//WHEN IT'S 59'59'', HOUR++
 		if (Mzero == 1 && Szero == 1)
 			THen = 1;
+		//when it's 23hr 59'59'', DAY++
+		if (Hzero == 1 && Mzero == 1 && Szero == 1)
+			TDen = 1;
 	end
-	if (Alarmon)
-	begin
-		if ((TDys%7 == 6) && (TDys%7 == 7))
-			Buzz = (TMin == AMin) && (THrs == AHrs);
-	end
-	else
+	
+	// The alarm will never buzz on Saturdays(day 5) or Sundays(day 6),
+	// regardless of whether the alarm is enabled or not.
+	if ((TDys % 7 == 5) || (TDys % 7 == 6))
 		Buzz = 0;
-			
+	else begin
+		if (Alarmon)
+			Buzz = buzz;
+		else
+			Buzz = 0;
+	end			
 end
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
   ct_mod_N #(.N(NS)) Sct(
@@ -77,8 +95,12 @@ end
 	.clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
     );
 // days counter -- runs at either 1/sec or 1/60min
-  ct_mod_N #(.N(24)) Dct(
+	ct_mod_N #(.N(ND)) Dct(
 	.clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
+    );
+// days counter -- runs at either 1/sec or 1/60min
+	ct_mod_N #(.N(ND)) Monthct(
+	.clk(Pulse), .rst(Reset), .en(TMonen), .ct_out(TMon), .z(Monzero)
     );
 // alarm set registers -- either hold or advance 1/sec
   ct_mod_N #(.N(NS)) Mreg(
