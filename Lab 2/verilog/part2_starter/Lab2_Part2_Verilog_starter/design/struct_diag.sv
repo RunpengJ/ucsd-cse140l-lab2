@@ -69,7 +69,7 @@ always_comb begin
 		Buzz = 0;
 	else begin
 		if (Alarmon)
-			Buzz = (TMin == AMin) && (THrs == AHrs);
+			Buzz = buzz;
 		else
 			Buzz = 0;
 	end			
