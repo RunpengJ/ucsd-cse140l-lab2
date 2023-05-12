@@ -55,7 +55,7 @@ always_comb begin
 	
 	//The alarm will never buzz on Saturdays(day 5) or Sundays(day 6),
 	//regardless of whether the alarm is enabled or not.
-	if ((TDys == 5) || (TDys == 6))
+	if ((TDys % 7 == 5) || (TDys % 7 == 6))
 		Buzz = 0;
 	else begin
 		if (Alarmon)
