@@ -20,7 +20,8 @@ module struct_diag #(parameter NS=60, NH=24)(
              AMin, AHrs;		   // alarm setting
   logic[6:0] Min, Hrs;
   logic Szero, Mzero, Hzero, 	   // "carry out" from sec -> min, min -> hrs, hrs -> days
-        TMen, THen, AMen, AHen; 
+        TMen, THen, AMen, AHen;
+  logic buzz;
 always_comb begin
 	//SET TIME
 	if(Alarmset == 1 && Timeset == 0) begin
