@@ -52,14 +52,17 @@ always_comb begin
 		if (Mzero == 1 && Szero == 1)
 			THen = 1;
 	end
-	if (Alarmon)
-	begin
-		if ((TDys%7 == 6) && (TDys%7 == 7))
-			Buzz = (TMin == AMin) && (THrs == AHrs);
-	end
-	else
+	
+	//The alarm will never buzz on Saturdays(day 5) or Sundays(day 6),
+	//regardless of whether the alarm is enabled or not.
+	if ((TDys == 5) || (TDys == 6))
 		Buzz = 0;
-			
+	else begin
+		if (Alarmon)
+			Buzz = (TMin == AMin) && (THrs == AHrs);
+		else
+			Buzz = 0;
+	end			
 end
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
   ct_mod_N #(.N(NS)) Sct(
