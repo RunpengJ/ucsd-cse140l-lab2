@@ -70,7 +70,7 @@ module struct_diag #(parameter NS=60, NH=24)(
 
 // buzz off :)	  make the connections
   alarm a1(
-    .tmin(), .amin(), .thrs(), .ahrs(), .buzz()
+	  .tmin(TMin), .amin(AMin), .thrs(THrs), .ahrs(AHrs), .buzz(Buzz)
 	);
 
 endmodule
