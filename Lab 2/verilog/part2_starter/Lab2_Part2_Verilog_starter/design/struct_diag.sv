@@ -1,7 +1,7 @@
 // CSE140L  
 // see Structural Diagram in Lab2 assignment writeup
 // fill in missing connections and parameters
-module struct_diag #(parameter NS=60, NH=24)(
+module struct_diag #(parameter NS=60, NH=24, ND=7)(
   input Reset,
         Timeset, 	  // manual buttons
         Alarmset,	  //	(five total)
@@ -90,7 +90,7 @@ end
 	.clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
     );
 // days counter -- runs at either 1/sec or 1/60min
-  ct_mod_N #(.N(24)) Dct(
+	ct_mod_N #(.N(ND)) Dct(
 	.clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
     );
 // alarm set registers -- either hold or advance 1/sec
