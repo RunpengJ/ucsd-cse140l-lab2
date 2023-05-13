@@ -73,7 +73,7 @@ module struct_diag #(parameter NS=60, NH=24)(
 	  .Segment0  (H0disp)
 	);
   lcd_int Ddisp(
-    .bin_in    (Dys),
+    .bin_in    (TDys),
 	.Segment1  (),
 	  .Segment0  (D0disp)
 	);
