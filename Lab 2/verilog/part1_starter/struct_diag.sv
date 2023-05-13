@@ -25,7 +25,7 @@ module struct_diag #(parameter NS=60, NH=24)(
 always_comb begin
 	//SET TIME
 	if(Alarmset == 1 && Timeset == 0) begin
-		//DISPLAY ALARM TIME
+		// DISPLAY ALARM TIME
 		Min = AMin;
 		Hrs = AHrs;
 		if (Minadv)
@@ -39,6 +39,7 @@ always_comb begin
 			AHen = 0;
 	end
 	else if (Alarmset == 0 && Timeset == 1) begin
+		// DISPLAY SET TIME
 		Min = TMin;
 		Hrs = THrs;
 		if (Minadv)
