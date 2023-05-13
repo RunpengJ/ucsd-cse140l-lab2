@@ -76,7 +76,6 @@ module struct_diag #(parameter NS=60, NH=24)(
 	Hrs = 0;
     TMen = 0;
     THen = 0;
-    TDen = 0;
 	if (Alarmset && !Timeset) begin
 		// display alarm
 		Min = AMin;
