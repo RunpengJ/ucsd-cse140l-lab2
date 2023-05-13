@@ -22,57 +22,7 @@ module struct_diag #(parameter NS=60, NH=24)(
   logic Szero, Mzero, Hzero, 	   // "carry out" from sec -> min, min -> hrs, hrs -> days
         TMen, THen, AMen, AHen;
   logic buzz;
-always_comb begin
-	//SET TIME
-	if(Alarmset == 1 && Timeset == 0) begin
-		// DISPLAY ALARM TIME
-		Min = AMin;
-		Hrs = AHrs;
-		if (Minadv)
-			AMen = 1;
-		else
-			AMen = 0;
 
-		if (Hrsadv)
-			AHen = 1;
-		else
-			AHen = 0;
-	end
-	else if (Alarmset == 0 && Timeset == 1) begin
-		// DISPLAY SET TIME
-		Min = TMin;
-		Hrs = THrs;
-		if (Minadv)
-			TMen = 1;
-		else
-			TMen = 0;
-
-		if (Hrsadv)
-			THen = 1;
-		else
-			THen = 0;
-	end
-	else begin
-		Min = TMin;
-		Hrs = THrs;
-		//WHEN IT'S 59'', MINUTE++
-		if (Szero == 1)
-			TMen = 1;
-		else
-			TMen = 0;
-
-		//WHEN IT'S 59'59'', HOUR++
-		if (Mzero == 1 && Szero == 1)
-			THen = 1;
-		else
-			THen = 0;
-	end
-	if (Alarmon)
-		Buzz = buzz;
-	else
-		Buzz = 0;
-			
-end
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
   ct_mod_N #(.N(NS)) Sct(
 // input ports
@@ -88,6 +38,7 @@ end
   ct_mod_N #(.N(NH)) Hct(
 	.clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
     );
+
 // alarm set registers -- either hold or advance 1/sec
   ct_mod_N #(.N(NS)) Mreg(
 // input ports
@@ -95,7 +46,6 @@ end
 // output ports    
     .ct_out(AMin), .z()
     ); 
-
   ct_mod_N #(.N(NH)) Hreg(
     .clk(Pulse), .rst(Reset), .en(AHen), .ct_out(AHrs), .z()
     ); 
@@ -118,10 +68,41 @@ end
 	.Segment1  (H1disp),
 	  .Segment0  (H0disp)
 	);
-
-// buzz off :)	  make the connections
+	
+  always_comb begin
+	if (Alarmset && !Timeset) begin
+		// display alarm
+		Min = AMin;
+		Hrs = AHrs;
+		AMen = Minadv;
+		AHen = Hrsadv;
+	end
+	else if (!Alarmset && Timeset) begin
+		// display current time
+		Min = TMin;
+		Hrs = THrs;
+		TMen = Minadv;
+		THen = Hrsadv;
+	end
+	else begin
+		// rolling over
+		Min = TMin;
+		Hrs = THrs;
+		// min++ when Szero is 1
+		TMen = Szero;
+		// hr++ when Mzero and Szero are 1
+		THen = Mzero && Szero;
+	end
+	// buzz only when alarm on and time matches
+	if (Alarmon)
+		Buzz = buzz;
+	else
+		Buzz = 0;		
+  end
+  
+  // buzz off :)	  make the connections
   alarm a1(
 	  .tmin(TMin), .amin(AMin), .thrs(THrs), .ahrs(AHrs), .buzz(buzz)
-	);
-
+  );
+  
 endmodule
