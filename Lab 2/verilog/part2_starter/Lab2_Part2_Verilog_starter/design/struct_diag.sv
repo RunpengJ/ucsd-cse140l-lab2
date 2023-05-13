@@ -1,102 +1,29 @@
 // CSE140L  
 // see Structural Diagram in Lab2 assignment writeup
 // fill in missing connections and parameters
-module struct_diag #(parameter NS=60, NH=24, ND=7)(
+module struct_diag #(parameter NS=60, NH=24)(
   input Reset,
         Timeset, 	  // manual buttons
         Alarmset,	  //	(five total)
 		Minadv,
 		Hrsadv,
-		Dysadv,
+		Dayadv,
 		Alarmon,
 		Pulse,		  // assume 1/sec.
 // 6 decimal digit display (7 segment)
   output [6:0] S1disp, S0disp, 	   // 2-digit seconds display
                M1disp, M0disp, 
                H1disp, H0disp,
-			D0disp, 
-			// D1disp, 
-//                       D0disp,   // for part 2
+                       D0disp,   // for part 2
   output logic Buzz);	           // alarm sounds
 // internal connections (may need more)
-  logic[6:0] TSec, TMin, THrs, TDys    // clock/time 
+  logic[6:0] TSec, TMin, THrs, TDys,     // clock/time 
              AMin, AHrs;		   // alarm setting
   logic[6:0] Min, Hrs, Dys;
-  logic Szero, Mzero, Hzero, Dzero	   // "carry out" from sec -> min, min -> hrs, hrs -> days
+  logic Szero, Mzero, Hzero, Dzero,	   // "carry out" from sec -> min, min -> hrs, hrs -> days
         TMen, THen, TDen, AMen, AHen;
   logic buzz;
-always_comb begin
-	//SET ALARM TIME
-	if(Alarmset == 1 && Timeset == 0) begin
-		// DISPLAY ALARM TIME
-		Min = AMin;
-		Hrs = AHrs;
-		if (Minadv)
-			AMen = 1;
-		else
-			AMen = 0;
 
-		if (Hrsadv)
-			AHen = 1;
-		else
-			AHen = 0;
-	end
-	//SET TIME
-	else if (Alarmset == 0 && Timeset == 1) begin
-		Min = TMin;
-		Hrs = THrs;
-		Dys = TDys;
-
-		if (Minadv)
-			TMen = 1;
-		else
-			TMen = 0;
-
-		if (Hrsadv)
-			THen = 1;
-		else
-			THen = 0;
-
-		if (Dysadv)
-			TDen = 1;
-		else 
-			TDen = 0;
-	end
-	// when begin rolling over
-	else begin
-		Min = TMin;
-		Hrs = THrs;
-		Dys = TDys;
-		//WHEN IT'S 59'', MINUTE++
-		if (Szero == 1)
-			TMen = 1;
-		else
-			TMen = 0;
-		//WHEN IT'S 59'59'', HOUR++
-		if (Mzero == 1 && Szero == 1)
-			THen = 1;
-		else
-			THen = 0;
-		//when it's 23hr 59'59'', DAY++
-		if (Hzero == 1 && Mzero == 1 && Szero == 1)
-			TDen = 1;
-		else
-			TDen = 0;
-		// if (Dzero == 1 && Hzero == 1 && Mzero == 1 && Szero == 1)
-		// 	TDen = 1;
-	end
-	
-	// The alarm will never buzz on Saturdays(day 5) or Sundays(day 6),
-	// regardless of whether the alarm is enabled or not.
-	if ((TDys % 7 == 5) || (TDys % 7 == 6))
-		Buzz = 0;
-	else begin
-		if (Alarmon)
-			Buzz = buzz;
-		else
-			Buzz = 0;
-	end			
-end
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
   ct_mod_N #(.N(NS)) Sct(
 // input ports
@@ -112,10 +39,10 @@ end
   ct_mod_N #(.N(NH)) Hct(
 	.clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
     );
-// days counter -- runs at either 1/sec or 1/60min
-	ct_mod_N #(.N(ND)) Dct(
+  ct_mod_N #(.N(7)) Dct(
 	.clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
     );
+
 // alarm set registers -- either hold or advance 1/sec
   ct_mod_N #(.N(NS)) Mreg(
 // input ports
@@ -123,7 +50,6 @@ end
 // output ports    
     .ct_out(AMin), .z()
     ); 
-
   ct_mod_N #(.N(NH)) Hreg(
     .clk(Pulse), .rst(Reset), .en(AHen), .ct_out(AHrs), .z()
     ); 
@@ -146,16 +72,59 @@ end
 	.Segment1  (H1disp),
 	  .Segment0  (H0disp)
 	);
-
   lcd_int Ddisp(
     .bin_in    (Dys),
-	// .Segment1  (D1disp),
+	.Segment1  (),
 	  .Segment0  (D0disp)
 	);
-
-// buzz off :)	  make the connections
+	
+  always_comb begin
+    AMen = 0;
+	AHen = 0;
+    Min = 0;
+	Hrs = 0;
+    Dys = 0;
+    TMen = 0;
+    THen = 0;
+    TDen = 0;
+	if (Alarmset && !Timeset) begin
+		// display alarm
+		Min = AMin;
+		Hrs = AHrs;
+		AMen = Minadv;
+		AHen = Hrsadv;
+	end
+	else if (!Alarmset && Timeset) begin
+		// display current time
+		Min = TMin;
+		Hrs = THrs;
+		Dys = TDys;
+		TMen = Minadv;
+		THen = Hrsadv;
+		TDen = Dayadv;
+	end
+	else begin
+		// rolling over
+		Min = TMin;
+		Hrs = THrs;
+		Dys = TDys;
+		// min++ when Szero is 1
+		TMen = Szero;
+		// hr++ when Mzero and Szero are 1
+		THen = Mzero && Szero;
+		// dys++ when Hzero, Mzero and Szero are 1
+		TDen = Hzero && Mzero && Szero;
+	end
+	// buzz only when alarm on and time matches
+    if (Alarmon && TDys < 5)
+		Buzz = buzz;
+	else
+		Buzz = 0;		
+  end
+  
+  // buzz off :)	  make the connections
   alarm a1(
 	  .tmin(TMin), .amin(AMin), .thrs(THrs), .ahrs(AHrs), .buzz(buzz)
-	);
-
+  );
+  
 endmodule
