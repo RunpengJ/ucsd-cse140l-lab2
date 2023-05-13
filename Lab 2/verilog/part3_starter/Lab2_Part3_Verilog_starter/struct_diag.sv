@@ -24,7 +24,7 @@ module struct_diag #(parameter NS=60, NH=24)(
   logic[6:0] TSec, TMin, THrs, TDys, TDate, TMonth,     // clock/time 
              AMin, AHrs;		   // alarm setting
   logic[6:0] Min, Hrs, Dys, Date, Month;
-  logic Szero, Mzero, Hzero, Dzero, MONzero,   // "carry out" from sec -> min, min -> hrs, hrs -> days
+  logic Szero, Mzero, Hzero, Dzero, Datezero Monthzero,   // "carry out" from sec -> min, min -> hrs, hrs -> days
         TMen, THen, TDen, TDateen, TMonthen, AMen, AHen;
   logic buzz;
 
@@ -46,8 +46,11 @@ module struct_diag #(parameter NS=60, NH=24)(
   ct_mod_N #(.N(7)) Dct(
 	.clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
     );
+  ct_mod_N #(.N(ND)) Datect(
+	.clk(Pulse), .rst(Reset), .en(TDateen), .ct_out(TDate), .z(Datezero)
+    );
   ct_mod_N #(.N(12)) Monthct(
-	.clk(Pulse), .rst(Reset), .en(TMonthen), .ct_out(Tmonth), .z(MONzero)
+	.clk(Pulse), .rst(Reset), .en(TMonthen), .ct_out(Tmonth), .z(Monthzero)
     );
 
 // alarm set registers -- either hold or advance 1/sec
@@ -98,7 +101,6 @@ module struct_diag #(parameter NS=60, NH=24)(
   always_comb begin
     AMen = 0;
 	AHen = 0;
-
     Min = 0;
 	Hrs = 0;
     Dys = 0;
@@ -109,6 +111,17 @@ module struct_diag #(parameter NS=60, NH=24)(
     TDen = 0;
 	TDateen = 0;
 	TMonthen = 0;
+
+	if (Tmonth == 1) begin
+		ND = 28
+	end
+	else if (Tmonth == 3 || Tmonth == 5 || Tmonth == 8 || Tmonth == 10) begin
+		ND = 30
+	end
+	else begin
+		ND = 31
+	end
+
 	if (Alarmset && !Timeset) begin
 		// display alarm
 		Min = AMin;
@@ -130,7 +143,7 @@ module struct_diag #(parameter NS=60, NH=24)(
 		TMonthen = Monthadv;
 	end
 	else begin
-		// rolling over
+		// time rolling
 		Min = TMin;
 		Hrs = THrs;
 		Dys = TDys;
@@ -143,7 +156,7 @@ module struct_diag #(parameter NS=60, NH=24)(
 		// dys++ when Hzero, Mzero and Szero are 1
 		TDen = Hzero && Mzero && Szero;
 		TDateen = Hzero && Mzero && Szero;
-		if ()
+		TMonthen = Datezero && Hzero && Mzero && Szero;
 	end
 	// buzz only when alarm on and time matches
     if (Alarmon && TDys < 5)
