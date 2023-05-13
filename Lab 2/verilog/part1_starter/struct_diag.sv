@@ -70,6 +70,14 @@ module struct_diag #(parameter NS=60, NH=24)(
 	);
 	
   always_comb begin
+	AMen = 0;
+	AHen = 0;
+    Min = 0;
+	Hrs = 0;
+    Dys = 0;
+    TMen = 0;
+    THen = 0;
+    TDen = 0;
 	if (Alarmset && !Timeset) begin
 		// display alarm
 		Min = AMin;
