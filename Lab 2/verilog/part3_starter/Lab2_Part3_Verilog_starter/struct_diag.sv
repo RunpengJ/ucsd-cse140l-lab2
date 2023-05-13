@@ -17,15 +17,15 @@ module struct_diag #(parameter NS=60, NH=24)(
                M1disp, M0disp, 
                H1disp, H0disp,
                        D0disp,   // for part 2
-			   DT1disp, DT0disp,
-			   MON1disp, MON0disp,
+			   Date1disp, Date0disp,
+			   Month1disp, Month0disp,
   output logic Buzz);	           // alarm sounds
 // internal connections (may need more)
-  logic[6:0] TSec, TMin, THrs, TDys, TMons,     // clock/time 
+  logic[6:0] TSec, TMin, THrs, TDys, TDate, TMonth,     // clock/time 
              AMin, AHrs;		   // alarm setting
-  logic[6:0] Min, Hrs, Dys, Dts, Mon;
+  logic[6:0] Min, Hrs, Dys, Date, Month;
   logic Szero, Mzero, Hzero, Dzero, MONzero,   // "carry out" from sec -> min, min -> hrs, hrs -> days
-        TMen, THen, TDen, TDTen, TMONen, AMen, AHen;
+        TMen, THen, TDen, TDateen, TMonthen, AMen, AHen;
   logic buzz;
 
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
@@ -47,7 +47,7 @@ module struct_diag #(parameter NS=60, NH=24)(
 	.clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
     );
   ct_mod_N #(.N(12)) Monthct(
-	.clk(Pulse), .rst(Reset), .en(TMonen), .ct_out(TMons), .z(Monzero)
+	.clk(Pulse), .rst(Reset), .en(TMonthen), .ct_out(Tmonth), .z(MONzero)
     );
 
 // alarm set registers -- either hold or advance 1/sec
@@ -85,25 +85,30 @@ module struct_diag #(parameter NS=60, NH=24)(
 	  .Segment0  (D0disp)
 	);
   lcd_int Dtdisp(
-    .bin_in    (Dts),
-	.Segment1  (DT1disp),
-	  .Segment0  (DT0disp)
+    .bin_in    (Date),
+	.Segment1  (Date1disp),
+	  .Segment0  (Date0disp)
 	);
   lcd_int Mondisp(
-    .bin_in    (Mon),
-	.Segment1  (mond),
-	  .Segment0  (D0disp)
+    .bin_in    (Month),
+	.Segment1  (Month1disp),
+	  .Segment0  (Month0disp)
 	);
 	
   always_comb begin
     AMen = 0;
 	AHen = 0;
+
     Min = 0;
 	Hrs = 0;
     Dys = 0;
+	Date = 0;
+	Month = 0;
     TMen = 0;
     THen = 0;
     TDen = 0;
+	TDateen = 0;
+	TMonthen = 0;
 	if (Alarmset && !Timeset) begin
 		// display alarm
 		Min = AMin;
@@ -116,21 +121,29 @@ module struct_diag #(parameter NS=60, NH=24)(
 		Min = TMin;
 		Hrs = THrs;
 		Dys = TDys;
+		Date = TDate;
+		Month = TMonth;
 		TMen = Minadv;
 		THen = Hrsadv;
 		TDen = Dayadv;
+		TDateen = Dateadv;
+		TMonthen = Monthadv;
 	end
 	else begin
 		// rolling over
 		Min = TMin;
 		Hrs = THrs;
 		Dys = TDys;
+		Date = TDate;
+		Month = TMonth;
 		// min++ when Szero is 1
 		TMen = Szero;
 		// hr++ when Mzero and Szero are 1
 		THen = Mzero && Szero;
 		// dys++ when Hzero, Mzero and Szero are 1
 		TDen = Hzero && Mzero && Szero;
+		TDateen = Hzero && Mzero && Szero;
+		if ()
 	end
 	// buzz only when alarm on and time matches
     if (Alarmon && TDys < 5)
