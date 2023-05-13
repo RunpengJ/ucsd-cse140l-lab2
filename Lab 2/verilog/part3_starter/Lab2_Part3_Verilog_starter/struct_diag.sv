@@ -1,7 +1,7 @@
 // CSE140L  
 // see Structural Diagram in Lab2 assignment writeup
 // fill in missing connections and parameters
-module struct_diag #(parameter NS=60, NH=24)(
+module struct_diag #(parameter NS=7'b0111100, NH=7'b0011000)(
   input Reset,
         Timeset, 	  // manual buttons
         Alarmset,	  //	(five total)
@@ -27,7 +27,7 @@ module struct_diag #(parameter NS=60, NH=24)(
   logic Szero, Mzero, Hzero, Dzero, Datezero, Monthzero,   // "carry out" from sec -> min, min -> hrs, hrs -> days
         TMen, THen, TDen, TDateen, TMonthen, AMen, AHen;
   logic buzz;
-  logic[6:0] ND = 31; // no. of dates in a month; 31 by default
+  logic[6:0] ND = 7'b0011111; // no. of dates in a month; 31 by default
   
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
   ct_mod_N Sct(
@@ -42,16 +42,16 @@ module struct_diag #(parameter NS=60, NH=24)(
     );
 // hours counter -- runs at either 1/sec or 1/60min
   ct_mod_N Hct(
-	.N(NH), .clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
+    .N(NH), .clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
     );
   ct_mod_N Dct(
-	.N(7), .clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
+    .N(7'b0000111), .clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
     );
   ct_mod_N Datect(
 	.N(ND), .clk(Pulse), .rst(Reset), .en(TDateen), .ct_out(TDate), .z(Datezero)
     );
   ct_mod_N Monthct(
-    .N(12), .clk(Pulse), .rst(Reset), .en(TMonthen), .ct_out(TMonth), .z(Monthzero)
+    .N(7'b0001100), .clk(Pulse), .rst(Reset), .en(TMonthen), .ct_out(TMonth), .z(Monthzero)
     );
 
 // alarm set registers -- either hold or advance 1/sec
@@ -89,12 +89,12 @@ module struct_diag #(parameter NS=60, NH=24)(
 	  .Segment0  (D0disp)
 	);
   lcd_int Dtdisp(
-    .bin_in    (Date + 1),
+    .bin_in    (Date + 7'b0000001),
 	.Segment1  (Date1disp),
 	  .Segment0  (Date0disp)
 	);
   lcd_int Mondisp(
-    .bin_in    (Month + 1),
+    .bin_in    (Month + 7'b0000001),
 	.Segment1  (Month1disp),
 	  .Segment0  (Month0disp)
 	);
