@@ -8,6 +8,8 @@ module struct_diag #(parameter NS=60, NH=24)(
 		Minadv,
 		Hrsadv,
 		Dayadv,
+		Dateadv,
+		Monthadv,
 		Alarmon,
 		Pulse,		  // assume 1/sec.
 // 6 decimal digit display (7 segment)
@@ -15,13 +17,15 @@ module struct_diag #(parameter NS=60, NH=24)(
                M1disp, M0disp, 
                H1disp, H0disp,
                        D0disp,   // for part 2
+			   DT1disp, DT0disp,
+			   MON1disp, MON0disp,
   output logic Buzz);	           // alarm sounds
 // internal connections (may need more)
-  logic[6:0] TSec, TMin, THrs, TDys,     // clock/time 
+  logic[6:0] TSec, TMin, THrs, TDys, TMons,     // clock/time 
              AMin, AHrs;		   // alarm setting
-  logic[6:0] Min, Hrs, Dys;
-  logic Szero, Mzero, Hzero, Dzero,	   // "carry out" from sec -> min, min -> hrs, hrs -> days
-        TMen, THen, TDen, AMen, AHen;
+  logic[6:0] Min, Hrs, Dys, Dts, Mon;
+  logic Szero, Mzero, Hzero, Dzero, MONzero,   // "carry out" from sec -> min, min -> hrs, hrs -> days
+        TMen, THen, TDen, TDTen, TMONen, AMen, AHen;
   logic buzz;
 
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
@@ -41,6 +45,9 @@ module struct_diag #(parameter NS=60, NH=24)(
     );
   ct_mod_N #(.N(7)) Dct(
 	.clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
+    );
+  ct_mod_N #(.N(12)) Monthct(
+	.clk(Pulse), .rst(Reset), .en(TMonen), .ct_out(TMons), .z(Monzero)
     );
 
 // alarm set registers -- either hold or advance 1/sec
@@ -75,6 +82,16 @@ module struct_diag #(parameter NS=60, NH=24)(
   lcd_int Ddisp(
     .bin_in    (Dys),
 	.Segment1  (),
+	  .Segment0  (D0disp)
+	);
+  lcd_int Dtdisp(
+    .bin_in    (Dts),
+	.Segment1  (DT1disp),
+	  .Segment0  (DT0disp)
+	);
+  lcd_int Mondisp(
+    .bin_in    (Mon),
+	.Segment1  (mond),
 	  .Segment0  (D0disp)
 	);
 	
