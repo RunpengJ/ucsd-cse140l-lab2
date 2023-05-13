@@ -1,7 +1,8 @@
 // CSE140L  
 // What does this do? 
 // When does "z" go high? 
-module ct_mod_N #(parameter N=60)(
+module ct_mod_N (
+  input logic[6:0]  N,
   input             clk, 
                     rst, 
                     en,

@@ -24,44 +24,45 @@ module struct_diag #(parameter NS=60, NH=24)(
   logic[6:0] TSec, TMin, THrs, TDys, TDate, TMonth,     // clock/time 
              AMin, AHrs;		   // alarm setting
   logic[6:0] Min, Hrs, Dys, Date, Month;
-  logic Szero, Mzero, Hzero, Dzero, Datezero Monthzero,   // "carry out" from sec -> min, min -> hrs, hrs -> days
+  logic Szero, Mzero, Hzero, Dzero, Datezero, Monthzero,   // "carry out" from sec -> min, min -> hrs, hrs -> days
         TMen, THen, TDen, TDateen, TMonthen, AMen, AHen;
   logic buzz;
-
+  logic[6:0] ND = 31; // no. of dates in a month; 31 by default
+  
 // free-running seconds counter	-- be sure to set parameters on ct_mod_N modules
-  ct_mod_N #(.N(NS)) Sct(
+  ct_mod_N Sct(
 // input ports
-    .clk(Pulse), .rst(Reset), .en(!Timeset), 
+    .N(NS), .clk(Pulse), .rst(Reset), .en(!Timeset), 
 // output ports    
     .ct_out(TSec), .z(Szero)
     );
 // minutes counter -- runs at either 1/sec or 1/60sec
-  ct_mod_N #(.N(NS)) Mct(
-    .clk(Pulse), .rst(Reset), .en(TMen), .ct_out(TMin), .z(Mzero)
+  ct_mod_N Mct(
+    .N(NS), .clk(Pulse), .rst(Reset), .en(TMen), .ct_out(TMin), .z(Mzero)
     );
 // hours counter -- runs at either 1/sec or 1/60min
-  ct_mod_N #(.N(NH)) Hct(
-	.clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
+  ct_mod_N Hct(
+	.N(NH), .clk(Pulse), .rst(Reset), .en(THen), .ct_out(THrs), .z(Hzero)
     );
-  ct_mod_N #(.N(7)) Dct(
-	.clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
+  ct_mod_N Dct(
+	.N(7), .clk(Pulse), .rst(Reset), .en(TDen), .ct_out(TDys), .z(Dzero)
     );
-  ct_mod_N #(.N(ND)) Datect(
-	.clk(Pulse), .rst(Reset), .en(TDateen), .ct_out(TDate), .z(Datezero)
+  ct_mod_N Datect(
+	.N(ND), .clk(Pulse), .rst(Reset), .en(TDateen), .ct_out(TDate), .z(Datezero)
     );
-  ct_mod_N #(.N(12)) Monthct(
-	.clk(Pulse), .rst(Reset), .en(TMonthen), .ct_out(Tmonth), .z(Monthzero)
+  ct_mod_N Monthct(
+    .N(12), .clk(Pulse), .rst(Reset), .en(TMonthen), .ct_out(TMonth), .z(Monthzero)
     );
 
 // alarm set registers -- either hold or advance 1/sec
-  ct_mod_N #(.N(NS)) Mreg(
+  ct_mod_N Mreg(
 // input ports
-    .clk(Pulse), .rst(Reset), .en(AMen), 
+    .N(NS), .clk(Pulse), .rst(Reset), .en(AMen), 
 // output ports    
     .ct_out(AMin), .z()
     ); 
-  ct_mod_N #(.N(NH)) Hreg(
-    .clk(Pulse), .rst(Reset), .en(AHen), .ct_out(AHrs), .z()
+  ct_mod_N Hreg(
+    .N(NH), .clk(Pulse), .rst(Reset), .en(AHen), .ct_out(AHrs), .z()
     ); 
 
 // display drivers (2 digits each, 6 digits total)
@@ -88,12 +89,12 @@ module struct_diag #(parameter NS=60, NH=24)(
 	  .Segment0  (D0disp)
 	);
   lcd_int Dtdisp(
-    .bin_in    (Date),
+    .bin_in    (Date + 1),
 	.Segment1  (Date1disp),
 	  .Segment0  (Date0disp)
 	);
   lcd_int Mondisp(
-    .bin_in    (Month),
+    .bin_in    (Month + 1),
 	.Segment1  (Month1disp),
 	  .Segment0  (Month0disp)
 	);
@@ -112,14 +113,14 @@ module struct_diag #(parameter NS=60, NH=24)(
 	TDateen = 0;
 	TMonthen = 0;
 
-	if (Tmonth == 1) begin
-		ND = 28
+    if (TMonth == 1) begin
+		ND = 28;
 	end
-	else if (Tmonth == 3 || Tmonth == 5 || Tmonth == 8 || Tmonth == 10) begin
-		ND = 30
+    else if (TMonth == 3 || TMonth == 5 || TMonth == 8 || TMonth == 10) begin
+		ND = 30;
 	end
 	else begin
-		ND = 31
+		ND = 31;
 	end
 
 	if (Alarmset && !Timeset) begin
