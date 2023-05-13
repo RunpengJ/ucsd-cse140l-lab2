@@ -28,25 +28,39 @@ module struct_diag #(parameter NS=60, NH=24, ND=7)(
 always_comb begin
 	//SET ALARM TIME
 	if(Alarmset == 1 && Timeset == 0) begin
-		//DISPLAY ALARM TIME
+		// DISPLAY ALARM TIME
 		Min = AMin;
 		Hrs = AHrs;
 		if (Minadv)
 			AMen = 1;
+		else
+			AMen = 0;
+
 		if (Hrsadv)
 			AHen = 1;
+		else
+			AHen = 0;
 	end
 	//SET TIME
 	else if (Alarmset == 0 && Timeset == 1) begin
 		Min = TMin;
 		Hrs = THrs;
 		Dys = TDys;
+
 		if (Minadv)
 			TMen = 1;
+		else
+			TMen = 0;
+
 		if (Hrsadv)
 			THen = 1;
+		else
+			THen = 0;
+
 		if (Dysadv)
 			TDen = 1;
+		else 
+			TDen = 0;
 	end
 	// when begin rolling over
 	else begin
@@ -56,12 +70,18 @@ always_comb begin
 		//WHEN IT'S 59'', MINUTE++
 		if (Szero == 1)
 			TMen = 1;
+		else
+			TMen = 0;
 		//WHEN IT'S 59'59'', HOUR++
 		if (Mzero == 1 && Szero == 1)
 			THen = 1;
+		else
+			THen = 0;
 		//when it's 23hr 59'59'', DAY++
 		if (Hzero == 1 && Mzero == 1 && Szero == 1)
 			TDen = 1;
+		else
+			TDen = 0;
 		// if (Dzero == 1 && Hzero == 1 && Mzero == 1 && Szero == 1)
 		// 	TDen = 1;
 	end
